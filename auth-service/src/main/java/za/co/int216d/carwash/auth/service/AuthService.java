@@ -46,6 +46,7 @@ public class AuthService {
                 .emailVerified(false)
                 .build());
 
+        emailService.sendAccountCreated(email);
         String otp = otpService.issue(user.getId());
         emailService.sendOtp(email, otp, props.getOtp().getTtlMinutes());
         log.info("Registered user {} — OTP dispatched", user.getId());

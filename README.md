@@ -39,7 +39,10 @@ Create `.env` and set values as needed. Key settings:
 |---|---|---|
 | `DB_URL` | `jdbc:postgresql://localhost:5432/int216d_carwash` | Single DB, four schemas |
 | `JWT_SECRET` | `CHANGE_ME_TO_A_LONG_RANDOM_SECRET_MIN_32_BYTES` | **Change in production.** Min 32 chars. |
-| `MAIL_HOST` / `MAIL_PORT` | `localhost` / `1025` | MailHog UI at http://localhost:8025 |
+| `MAIL_HOST` / `MAIL_PORT` | `localhost` / `1025` | SMTP server host and port |
+| `MAIL_USERNAME` / `MAIL_PASSWORD` | empty | SMTP credentials from your mail provider |
+| `MAIL_FROM_ADDRESS` | `noreply@int216d.co.za` | Sender address for no-reply mails |
+| `MAIL_FROM_NAME` / `MAIL_PROJECT_NAME` | `INT216D Smart Car Wash` | Branded sender display name and project identity |
 
 ## Endpoints Live After Task 1-3
 

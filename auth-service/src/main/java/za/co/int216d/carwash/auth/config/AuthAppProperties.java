@@ -14,9 +14,15 @@ public class AuthAppProperties {
     public Cookie getCookie() { return cookie; }
 
     public static class Mail {
-        private String from = "noreply@int216d.co.za";
-        public String getFrom() { return from; }
-        public void setFrom(String from) { this.from = from; }
+        private String projectName = "INT216D Smart Car Wash";
+        private String fromName = "INT216D Smart Car Wash";
+        private String fromAddress = "noreply@int216d.co.za";
+        public String getProjectName() { return projectName; }
+        public void setProjectName(String projectName) { this.projectName = projectName; }
+        public String getFromName() { return fromName; }
+        public void setFromName(String fromName) { this.fromName = fromName; }
+        public String getFromAddress() { return fromAddress; }
+        public void setFromAddress(String fromAddress) { this.fromAddress = fromAddress; }
     }
 
     public static class Otp {
