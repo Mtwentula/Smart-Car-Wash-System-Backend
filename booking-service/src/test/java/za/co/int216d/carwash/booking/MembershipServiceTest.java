@@ -14,6 +14,10 @@ import za.co.int216d.carwash.booking.membership.repository.MembershipPlanReposit
 import za.co.int216d.carwash.booking.membership.repository.MembershipRepository;
 import za.co.int216d.carwash.booking.membership.service.MembershipService;
 import za.co.int216d.carwash.booking.notification.producer.MembershipEventProducer;
+import za.co.int216d.carwash.booking.payment.domain.PaymentStatus;
+import za.co.int216d.carwash.booking.payment.dto.PaymentProcessResult;
+import za.co.int216d.carwash.booking.payment.dto.PaymentRequest;
+import za.co.int216d.carwash.booking.payment.service.PaymentService;
 import za.co.int216d.carwash.common.exception.BadRequestException;
 import za.co.int216d.carwash.common.exception.ResourceNotFoundException;
 
@@ -41,6 +45,9 @@ class MembershipServiceTest {
 
     @Mock
     private MembershipEventProducer eventProducer;
+
+    @Mock
+    private PaymentService paymentService;
 
     @InjectMocks
     private MembershipService membershipService;
@@ -77,10 +84,20 @@ class MembershipServiceTest {
     @Test
     void testSubscribeToPlan_Success() {
         Long clientId = 100L;
-        SubscribeMembershipRequest request = new SubscribeMembershipRequest(1L, true);
+        SubscribeMembershipRequest request = new SubscribeMembershipRequest(
+            1L,
+            true,
+            PaymentRequest.builder().paymentMethodToken("tok_test").build()
+        );
+        PaymentProcessResult paymentResult = PaymentProcessResult.builder()
+            .transactionId(1L)
+            .reference("PAY-TEST")
+            .status(PaymentStatus.SUCCEEDED)
+            .build();
 
         when(membershipRepository.findByClientId(clientId)).thenReturn(Optional.empty());
         when(planRepository.findById(1L)).thenReturn(Optional.of(testPlan));
+        when(paymentService.processPayment(anyLong(), any(), any(), any(), any(), any(), any(), any())).thenReturn(paymentResult);
         when(membershipRepository.save(any())).thenReturn(testMembership);
         when(creditLogRepository.save(any())).thenReturn(null);
 
@@ -99,7 +116,11 @@ class MembershipServiceTest {
     @Test
     void testSubscribeToPlan_AlreadyHasActiveMembership() {
         Long clientId = 100L;
-        SubscribeMembershipRequest request = new SubscribeMembershipRequest(1L, true);
+        SubscribeMembershipRequest request = new SubscribeMembershipRequest(
+            1L,
+            true,
+            PaymentRequest.builder().paymentMethodToken("tok_test").build()
+        );
 
         when(membershipRepository.findByClientId(clientId)).thenReturn(Optional.of(testMembership));
 
@@ -111,7 +132,11 @@ class MembershipServiceTest {
     @Test
     void testSubscribeToPlan_PlanNotFound() {
         Long clientId = 100L;
-        SubscribeMembershipRequest request = new SubscribeMembershipRequest(999L, true);
+        SubscribeMembershipRequest request = new SubscribeMembershipRequest(
+            999L,
+            true,
+            PaymentRequest.builder().paymentMethodToken("tok_test").build()
+        );
 
         when(membershipRepository.findByClientId(clientId)).thenReturn(Optional.empty());
         when(planRepository.findById(999L)).thenReturn(Optional.empty());
@@ -122,7 +147,11 @@ class MembershipServiceTest {
     @Test
     void testSubscribeToPlan_InactivePlan() {
         Long clientId = 100L;
-        SubscribeMembershipRequest request = new SubscribeMembershipRequest(1L, true);
+        SubscribeMembershipRequest request = new SubscribeMembershipRequest(
+            1L,
+            true,
+            PaymentRequest.builder().paymentMethodToken("tok_test").build()
+        );
 
         testPlan.setIsActive(false);
 
