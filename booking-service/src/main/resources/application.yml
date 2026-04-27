@@ -29,3 +29,13 @@ logging:
     za.co.int216d: DEBUG
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
+
+app:
+  payment:
+    enabled: ${PAYMENTS_ENABLED:true}
+    currency: ${PAYMENT_CURRENCY:ZAR}
+    default-gateway: ${PAYMENT_DEFAULT_GATEWAY:SIMULATED}
+    enabled-gateways: ${PAYMENT_ENABLED_GATEWAYS:SIMULATED}
+    simulated:
+      auto-approve: ${PAYMENT_SIMULATED_AUTO_APPROVE:true}
+      fail-rate: ${PAYMENT_SIMULATED_FAIL_RATE:0.0}

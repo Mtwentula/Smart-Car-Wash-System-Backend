@@ -18,6 +18,8 @@ public record BookingResponse(
         String location,
         LocalDateTime scheduledAt,
         String status,
+        String paymentReference,
+        String paymentStatus,
         String notes,
         List<String> addOns,
         LocalDateTime createdAt,

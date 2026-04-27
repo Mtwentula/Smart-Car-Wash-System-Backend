@@ -1,7 +1,9 @@
 package za.co.int216d.carwash.booking.membership.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import za.co.int216d.carwash.booking.payment.dto.PaymentRequest;
 
 /**
  * DTO for client to subscribe to a membership plan
@@ -18,4 +20,8 @@ public class SubscribeMembershipRequest {
 
     @NotNull(message = "Auto-renewal preference is required")
     private Boolean autoRenew;
+
+    @NotNull(message = "Payment details are required")
+    @Valid
+    private PaymentRequest payment;
 }

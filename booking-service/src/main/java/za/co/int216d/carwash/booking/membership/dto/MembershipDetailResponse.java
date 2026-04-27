@@ -21,6 +21,8 @@ public class MembershipDetailResponse {
     private Integer creditsRemaining;
     private Integer washesUsedThisMonth;
     private Boolean autoRenew;
+    private String latestPaymentReference;
+    private String latestPaymentStatus;
     private Boolean isExpired;
     private Integer daysUntilExpiry;
     private LocalDateTime createdAt;

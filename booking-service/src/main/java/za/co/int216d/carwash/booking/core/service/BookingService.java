@@ -10,9 +10,14 @@ import za.co.int216d.carwash.booking.core.dto.BookingResponse;
 import za.co.int216d.carwash.booking.core.dto.CreateBookingRequest;
 import za.co.int216d.carwash.booking.core.dto.SlotAvailabilityResponse;
 import za.co.int216d.carwash.booking.core.repository.BookingRepository;
+import za.co.int216d.carwash.booking.payment.domain.PaymentPurpose;
+import za.co.int216d.carwash.booking.payment.dto.PaymentProcessResult;
+import za.co.int216d.carwash.booking.payment.service.PaymentCalculationService;
+import za.co.int216d.carwash.booking.payment.service.PaymentService;
 import za.co.int216d.carwash.common.exception.BadRequestException;
 import za.co.int216d.carwash.common.exception.ResourceNotFoundException;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -27,6 +32,8 @@ public class BookingService {
 
     private final BookingRepository bookingRepository;
     private final CatalogueService catalogueService;
+    private final PaymentCalculationService paymentCalculationService;
+    private final PaymentService paymentService;
 
     public BookingResponse createBooking(Long clientId, CreateBookingRequest request) {
         if (request.scheduledAt().isBefore(LocalDateTime.now().plusMinutes(15))) {
@@ -62,7 +69,25 @@ public class BookingService {
                 .addOns(String.join(",", request.addOns() == null ? List.of() : request.addOns()))
                 .build();
 
-        return toResponse(bookingRepository.save(booking));
+            booking = bookingRepository.save(booking);
+
+            BigDecimal amount = paymentCalculationService.calculateBookingAmount(normalizedCode, request.addOns());
+            PaymentProcessResult paymentResult = paymentService.processPayment(
+                clientId,
+                booking.getId(),
+                null,
+                PaymentPurpose.BOOKING,
+                amount,
+                request.email(),
+                "Booking payment for service " + normalizedCode,
+                request.payment()
+            );
+
+            booking.setPaymentReference(paymentResult.reference());
+            booking.setPaymentStatus(paymentResult.status().name());
+            booking = bookingRepository.save(booking);
+
+            return toResponse(booking);
     }
 
     @Transactional(readOnly = true)
@@ -157,6 +182,8 @@ public class BookingService {
                 .location(booking.getLocation())
                 .scheduledAt(booking.getScheduledAt())
                 .status(booking.getStatus().name())
+                .paymentReference(booking.getPaymentReference())
+                .paymentStatus(booking.getPaymentStatus())
                 .notes(booking.getNotes())
                 .addOns(addOns)
                 .createdAt(booking.getCreatedAt())
