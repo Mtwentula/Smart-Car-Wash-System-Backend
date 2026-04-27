@@ -3,23 +3,20 @@ package za.co.int216d.carwash.booking;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import za.co.int216d.carwash.booking.membership.web.MembershipController;
 import za.co.int216d.carwash.booking.membership.dto.MembershipDetailResponse;
 import za.co.int216d.carwash.booking.membership.dto.MembershipPaymentRequest;
 import za.co.int216d.carwash.booking.membership.dto.MembershipPlanResponse;
 import za.co.int216d.carwash.booking.membership.dto.SubscribeMembershipRequest;
 import za.co.int216d.carwash.booking.membership.service.MembershipService;
-import za.co.int216d.carwash.booking.payment.dto.PaymentRequest;
-import za.co.int216d.carwash.common.security.JwtAuthenticationFilter;
 import za.co.int216d.carwash.common.security.SecurityUtils;
+import za.co.int216d.carwash.booking.payment.dto.PaymentRequest;
 
 import java.time.LocalDateTime;
 
@@ -31,38 +28,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Controller tests for Membership endpoints
  */
-@SpringBootTest
-@AutoConfigureMockMvc
-@TestPropertySource(properties = {
-    "spring.flyway.enabled=false",
-    "spring.datasource.url=jdbc:h2:mem:testdb",
-    "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
-    "spring.jpa.hibernate.ddl-auto=create-drop"
-})
+@ExtendWith(MockitoExtension.class)
 class MembershipControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @MockBean
+    @Mock
     private MembershipService membershipService;
 
-    @MockBean
+    @Mock
     private SecurityUtils securityUtils;
-
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-
-    @MockBean
-    private JavaMailSender javaMailSender;
 
     private MembershipDetailResponse mockResponse;
 
     @BeforeEach
     void setUp() {
+        MembershipController controller = new MembershipController(membershipService, securityUtils);
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+
         MembershipPlanResponse planResponse = MembershipPlanResponse.builder()
             .id(1L)
             .name("Premium")
@@ -89,7 +74,6 @@ class MembershipControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "CLIENT")
     void testSubscribeToPlan_Success() throws Exception {
         PaymentRequest payment = PaymentRequest.builder()
             .gateway(null)
@@ -99,7 +83,7 @@ class MembershipControllerTest {
 
         when(membershipService.subscribeToPlan(eq(100L), any())).thenReturn(mockResponse);
 
-        mockMvc.perform(post("/api/v1/membership/subscribe")
+        mockMvc.perform(post("/membership/subscribe")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isCreated())
@@ -108,25 +92,22 @@ class MembershipControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "CLIENT")
     void testGetMembership_Success() throws Exception {
         when(membershipService.getClientMembership(100L)).thenReturn(mockResponse);
 
-        mockMvc.perform(get("/api/v1/membership/"))
+        mockMvc.perform(get("/membership"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("ACTIVE"))
             .andExpect(jsonPath("$.creditsRemaining").value(40));
     }
 
     @Test
-    @WithMockUser(roles = "CLIENT")
     void testCancelMembership_Success() throws Exception {
-        mockMvc.perform(post("/api/v1/membership/cancel"))
+        mockMvc.perform(post("/membership/cancel"))
             .andExpect(status().isNoContent());
     }
 
     @Test
-    @WithMockUser(roles = "CLIENT")
     void testRenewMembership_Success() throws Exception {
         PaymentRequest payment = PaymentRequest.builder()
             .gateway(null)
@@ -138,7 +119,7 @@ class MembershipControllerTest {
 
         when(membershipService.renewMembership(eq(100L), any(MembershipPaymentRequest.class))).thenReturn(mockResponse);
 
-        mockMvc.perform(post("/api/v1/membership/renew")
+        mockMvc.perform(post("/membership/renew")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())

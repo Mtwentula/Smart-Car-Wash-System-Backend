@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.TestPropertySource;
 import za.co.int216d.carwash.booking.membership.domain.Membership;
 import za.co.int216d.carwash.booking.membership.domain.MembershipPlan;
@@ -33,14 +34,21 @@ import static org.awaitility.Awaitility.await;
 @TestPropertySource(properties = {
     "spring.kafka.bootstrap-servers=localhost:9092",
     "spring.flyway.enabled=false",
-    "spring.datasource.url=jdbc:h2:mem:testdb",
+    "spring.datasource.url=jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE",
+    "spring.datasource.hikari.connection-init-sql=CREATE SCHEMA IF NOT EXISTS booking_schema",
     "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
-    "spring.jpa.hibernate.ddl-auto=create-drop"
+    "spring.jpa.hibernate.ddl-auto=create-drop",
+    "spring.jpa.properties.hibernate.default_schema=booking_schema",
+    "spring.jpa.properties.hibernate.hbm2ddl.create_namespaces=true",
+    "jwt.secret=testsecretkeytestsecretkeytestsecretkey123"
 })
 class MembershipEventIntegrationTest {
 
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @MockBean
+    private JavaMailSender javaMailSender;
 
     @Autowired
     private MembershipEventProducer eventProducer;
