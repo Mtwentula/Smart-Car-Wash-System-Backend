@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.TestPropertySource;
@@ -13,6 +14,7 @@ import za.co.int216d.carwash.booking.notification.domain.Notification;
 import za.co.int216d.carwash.booking.notification.event.MembershipEvent;
 import za.co.int216d.carwash.booking.notification.producer.MembershipEventProducer;
 import za.co.int216d.carwash.booking.notification.repository.NotificationRepository;
+import za.co.int216d.carwash.common.security.JwtAuthenticationFilter;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
@@ -32,9 +34,13 @@ import static org.awaitility.Awaitility.await;
     "spring.kafka.bootstrap-servers=localhost:9092",
     "spring.flyway.enabled=false",
     "spring.datasource.url=jdbc:h2:mem:testdb",
-    "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect"
+    "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+    "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class MembershipEventIntegrationTest {
+
+    @MockBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Autowired
     private MembershipEventProducer eventProducer;

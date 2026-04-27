@@ -18,6 +18,7 @@ import za.co.int216d.carwash.booking.membership.dto.SubscribeMembershipRequest;
 import za.co.int216d.carwash.booking.membership.repository.MembershipPlanRepository;
 import za.co.int216d.carwash.booking.membership.repository.MembershipRepository;
 import za.co.int216d.carwash.booking.membership.service.MembershipService;
+import za.co.int216d.carwash.booking.payment.dto.PaymentRequest;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -85,7 +86,11 @@ class MembershipIntegrationTest {
     @Test
     void testSubscribeToPlan_Integration() {
         Long clientId = 100L;
-        SubscribeMembershipRequest request = new SubscribeMembershipRequest(testPlan.getId(), true);
+        SubscribeMembershipRequest request = new SubscribeMembershipRequest(
+            testPlan.getId(),
+            true,
+            PaymentRequest.builder().paymentMethodToken("tok_test").build()
+        );
 
         var response = membershipService.subscribeToPlan(clientId, request);
 
@@ -102,7 +107,11 @@ class MembershipIntegrationTest {
     @Test
     void testCancelMembership_Integration() {
         Long clientId = 100L;
-        SubscribeMembershipRequest request = new SubscribeMembershipRequest(testPlan.getId(), true);
+        SubscribeMembershipRequest request = new SubscribeMembershipRequest(
+            testPlan.getId(),
+            true,
+            PaymentRequest.builder().paymentMethodToken("tok_test").build()
+        );
 
         membershipService.subscribeToPlan(clientId, request);
         membershipService.cancelMembership(clientId);
@@ -115,7 +124,11 @@ class MembershipIntegrationTest {
     @Test
     void testGetMembershipDetails_Integration() {
         Long clientId = 100L;
-        SubscribeMembershipRequest request = new SubscribeMembershipRequest(testPlan.getId(), true);
+        SubscribeMembershipRequest request = new SubscribeMembershipRequest(
+            testPlan.getId(),
+            true,
+            PaymentRequest.builder().paymentMethodToken("tok_test").build()
+        );
 
         membershipService.subscribeToPlan(clientId, request);
         var details = membershipService.getClientMembership(clientId);
@@ -128,7 +141,11 @@ class MembershipIntegrationTest {
     @Test
     void testDeductCredits_Integration() {
         Long clientId = 100L;
-        SubscribeMembershipRequest request = new SubscribeMembershipRequest(testPlan.getId(), true);
+        SubscribeMembershipRequest request = new SubscribeMembershipRequest(
+            testPlan.getId(),
+            true,
+            PaymentRequest.builder().paymentMethodToken("tok_test").build()
+        );
 
         membershipService.subscribeToPlan(clientId, request);
         var beforeDeduction = membershipRepository.findByClientId(clientId).get().getCreditsRemaining();
@@ -142,7 +159,11 @@ class MembershipIntegrationTest {
     @Test
     void testAddCredits_Integration() {
         Long clientId = 100L;
-        SubscribeMembershipRequest request = new SubscribeMembershipRequest(testPlan.getId(), true);
+        SubscribeMembershipRequest request = new SubscribeMembershipRequest(
+            testPlan.getId(),
+            true,
+            PaymentRequest.builder().paymentMethodToken("tok_test").build()
+        );
 
         membershipService.subscribeToPlan(clientId, request);
         var beforeAddition = membershipRepository.findByClientId(clientId).get().getCreditsRemaining();
@@ -156,7 +177,11 @@ class MembershipIntegrationTest {
     @Test
     void testMembershipPersistence() {
         Long clientId = 101L;
-        SubscribeMembershipRequest request = new SubscribeMembershipRequest(testPlan.getId(), true);
+        SubscribeMembershipRequest request = new SubscribeMembershipRequest(
+            testPlan.getId(),
+            true,
+            PaymentRequest.builder().paymentMethodToken("tok_test").build()
+        );
 
         membershipService.subscribeToPlan(clientId, request);
 
