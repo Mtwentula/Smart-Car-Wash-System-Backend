@@ -7,15 +7,20 @@ import za.co.int216d.carwash.booking.membership.domain.Membership;
 import za.co.int216d.carwash.booking.membership.domain.MembershipCreditLog;
 import za.co.int216d.carwash.booking.membership.domain.MembershipPlan;
 import za.co.int216d.carwash.booking.membership.dto.MembershipDetailResponse;
+import za.co.int216d.carwash.booking.membership.dto.MembershipPaymentRequest;
 import za.co.int216d.carwash.booking.membership.dto.MembershipPlanResponse;
 import za.co.int216d.carwash.booking.membership.dto.SubscribeMembershipRequest;
 import za.co.int216d.carwash.booking.membership.repository.MembershipCreditLogRepository;
 import za.co.int216d.carwash.booking.membership.repository.MembershipPlanRepository;
 import za.co.int216d.carwash.booking.membership.repository.MembershipRepository;
 import za.co.int216d.carwash.booking.notification.producer.MembershipEventProducer;
+import za.co.int216d.carwash.booking.payment.domain.PaymentPurpose;
+import za.co.int216d.carwash.booking.payment.dto.PaymentProcessResult;
+import za.co.int216d.carwash.booking.payment.service.PaymentService;
 import za.co.int216d.carwash.common.exception.BadRequestException;
 import za.co.int216d.carwash.common.exception.ResourceNotFoundException;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -31,17 +36,20 @@ public class MembershipService {
     private final MembershipPlanRepository planRepository;
     private final MembershipCreditLogRepository creditLogRepository;
     private final MembershipEventProducer eventProducer;
+    private final PaymentService paymentService;
 
     public MembershipService(
         MembershipRepository membershipRepository,
         MembershipPlanRepository planRepository,
         MembershipCreditLogRepository creditLogRepository,
-        MembershipEventProducer eventProducer
+        MembershipEventProducer eventProducer,
+        PaymentService paymentService
     ) {
         this.membershipRepository = membershipRepository;
         this.planRepository = planRepository;
         this.creditLogRepository = creditLogRepository;
         this.eventProducer = eventProducer;
+        this.paymentService = paymentService;
     }
 
     /**
@@ -66,6 +74,18 @@ public class MembershipService {
             throw new BadRequestException("Membership plan is no longer active");
         }
 
+        BigDecimal chargeAmount = BigDecimal.valueOf(plan.getMonthlyPrice());
+        PaymentProcessResult paymentResult = paymentService.processPayment(
+            clientId,
+            null,
+            null,
+            PaymentPurpose.MEMBERSHIP_SUBSCRIPTION,
+            chargeAmount,
+            null,
+            "Membership subscription for plan " + plan.getName(),
+            request.getPayment()
+        );
+
         // Create new membership
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime expiryDate = now.plusMonths(1);
@@ -79,6 +99,8 @@ public class MembershipService {
             .creditsRemaining(plan.getCreditsPerMonth())
             .washesUsedThisMonth(0)
             .autoRenew(request.getAutoRenew())
+            .latestPaymentReference(paymentResult.reference())
+            .latestPaymentStatus(paymentResult.status().name())
             .build();
 
         membership = membershipRepository.save(membership);
@@ -123,7 +145,7 @@ public class MembershipService {
     /**
      * Renew a client's membership for another month
      */
-    public MembershipDetailResponse renewMembership(Long clientId) {
+    public MembershipDetailResponse renewMembership(Long clientId, MembershipPaymentRequest request) {
         log.info("Renewing membership for client {}", clientId);
 
         Membership membership = membershipRepository.findByClientId(clientId)
@@ -131,12 +153,26 @@ public class MembershipService {
 
         MembershipPlan plan = membership.getPlan();
 
+        BigDecimal chargeAmount = BigDecimal.valueOf(plan.getMonthlyPrice());
+        PaymentProcessResult paymentResult = paymentService.processPayment(
+            clientId,
+            null,
+            membership.getId(),
+            PaymentPurpose.MEMBERSHIP_RENEWAL,
+            chargeAmount,
+            null,
+            "Membership renewal for plan " + plan.getName(),
+            request.getPayment()
+        );
+
         // Update expiry and reset credits
         LocalDateTime newExpiryDate = LocalDateTime.now().plusMonths(1);
         membership.setExpiryDate(newExpiryDate);
         membership.setCreditsRemaining(plan.getCreditsPerMonth());
         membership.setWashesUsedThisMonth(0);
         membership.setStatus(Membership.MembershipStatus.ACTIVE);
+        membership.setLatestPaymentReference(paymentResult.reference());
+        membership.setLatestPaymentStatus(paymentResult.status().name());
 
         membership = membershipRepository.save(membership);
 
@@ -162,7 +198,7 @@ public class MembershipService {
     /**
      * Upgrade to a different plan
      */
-    public MembershipDetailResponse upgradePlan(Long clientId, Long newPlanId) {
+    public MembershipDetailResponse upgradePlan(Long clientId, Long newPlanId, MembershipPaymentRequest request) {
         log.info("Upgrading membership for client {} to plan {}", clientId, newPlanId);
 
         Membership membership = membershipRepository.findByClientId(clientId)
@@ -175,10 +211,24 @@ public class MembershipService {
             throw new BadRequestException("Target membership plan is no longer active");
         }
 
+        BigDecimal chargeAmount = BigDecimal.valueOf(newPlan.getMonthlyPrice());
+        PaymentProcessResult paymentResult = paymentService.processPayment(
+            clientId,
+            null,
+            membership.getId(),
+            PaymentPurpose.MEMBERSHIP_UPGRADE,
+            chargeAmount,
+            null,
+            "Membership upgrade to plan " + newPlan.getName(),
+            request.getPayment()
+        );
+
         // Update membership
         membership.setPlan(newPlan);
         membership.setCreditsRemaining(newPlan.getCreditsPerMonth());
         membership.setWashesUsedThisMonth(0);
+        membership.setLatestPaymentReference(paymentResult.reference());
+        membership.setLatestPaymentStatus(paymentResult.status().name());
 
         membership = membershipRepository.save(membership);
         log.info("Membership upgraded for client {}", clientId);
@@ -327,6 +377,8 @@ public class MembershipService {
             .creditsRemaining(membership.getCreditsRemaining())
             .washesUsedThisMonth(membership.getWashesUsedThisMonth())
             .autoRenew(membership.getAutoRenew())
+            .latestPaymentReference(membership.getLatestPaymentReference())
+            .latestPaymentStatus(membership.getLatestPaymentStatus())
             .isExpired(isExpired)
             .daysUntilExpiry((int) daysUntilExpiry)
             .createdAt(membership.getCreatedAt())

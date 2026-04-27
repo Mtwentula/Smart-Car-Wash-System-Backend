@@ -50,6 +50,12 @@ public class Membership {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean autoRenew;
 
+    @Column(length = 64)
+    private String latestPaymentReference;
+
+    @Column(length = 20)
+    private String latestPaymentStatus;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

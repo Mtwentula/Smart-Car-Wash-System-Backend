@@ -48,6 +48,12 @@ public class Booking {
     @Column(nullable = false, length = 20)
     private BookingStatus status;
 
+    @Column(length = 64)
+    private String paymentReference;
+
+    @Column(length = 20)
+    private String paymentStatus;
+
     @Column
     private String notes;
 

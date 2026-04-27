@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import za.co.int216d.carwash.booking.membership.dto.MembershipDetailResponse;
+import za.co.int216d.carwash.booking.membership.dto.MembershipPaymentRequest;
 import za.co.int216d.carwash.booking.membership.dto.SubscribeMembershipRequest;
 import za.co.int216d.carwash.booking.membership.service.MembershipService;
 import za.co.int216d.carwash.common.security.SecurityUtils;
@@ -61,10 +62,12 @@ public class MembershipController {
      */
     @PostMapping("/renew")
     @PreAuthorize("hasRole('CLIENT')")
-    public ResponseEntity<MembershipDetailResponse> renewMembership() {
+    public ResponseEntity<MembershipDetailResponse> renewMembership(
+        @Valid @RequestBody MembershipPaymentRequest request
+    ) {
         Long clientId = securityUtils.getCurrentUserIdAsLong();
         log.info("POST /membership/renew - Renewing membership for client {}", clientId);
-        MembershipDetailResponse response = membershipService.renewMembership(clientId);
+        MembershipDetailResponse response = membershipService.renewMembership(clientId, request);
         return ResponseEntity.ok(response);
     }
 
@@ -74,11 +77,12 @@ public class MembershipController {
     @PostMapping("/upgrade/{planId}")
     @PreAuthorize("hasRole('CLIENT')")
     public ResponseEntity<MembershipDetailResponse> upgradePlan(
-        @PathVariable Long planId
+        @PathVariable Long planId,
+        @Valid @RequestBody MembershipPaymentRequest request
     ) {
         Long clientId = securityUtils.getCurrentUserIdAsLong();
         log.info("POST /membership/upgrade/{} - Client {} upgrading plan", planId, clientId);
-        MembershipDetailResponse response = membershipService.upgradePlan(clientId, planId);
+        MembershipDetailResponse response = membershipService.upgradePlan(clientId, planId, request);
         return ResponseEntity.ok(response);
     }
 
