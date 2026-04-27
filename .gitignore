@@ -24,8 +24,20 @@ target/
 ### Env ###
 .env
 .env.*
-.env.example
 *.local
+!.env.example
+
+### Secrets ###
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+id_rsa
+id_rsa.pub
+*.kubeconfig
+secrets/
+credentials/
 
 ### Logs ###
 *.log

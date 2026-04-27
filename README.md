@@ -78,8 +78,8 @@ Each service runs Flyway only inside its own schema. **No service ever reaches a
 - [x] Task 1 — Project setup + Docker Compose + DB schemas
 - [x] Task 2 — Auth service (register, login, JWT, refresh, OTP email)
 - [x] Task 3 — Client service (profile, vehicles, addresses, mandate)
-- [ ] Task 4 — Service catalogue (public `/catalogue/services`, `/catalogue/addons`)
-- [ ] Task 5 — Booking core (slots, create/list/cancel/complete, Redis locking)
+- [x] Task 4 — Service catalogue (public `/catalogue/services`, `/catalogue/addons`)
+- [x] Task 5 — Booking core (slots, create/list/cancel/complete)
 - [x] Task 6 — Membership module (plans, subscriptions, credits, auto-renewal)
 - [ ] Task 7 — Admin endpoints
 - [ ] Task 8 — Kafka notifications (email + in-app)

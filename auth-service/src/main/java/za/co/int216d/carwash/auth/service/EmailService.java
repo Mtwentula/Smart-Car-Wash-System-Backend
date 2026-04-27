@@ -112,7 +112,7 @@ public class EmailService {
             helper.setFrom(new InternetAddress(
                 props.getMail().getFromAddress(),
                 props.getMail().getFromName(),
-                StandardCharsets.UTF_8));
+                StandardCharsets.UTF_8.name()));
             helper.setReplyTo(props.getMail().getFromAddress());
             mailSender.send(message);
         } catch (Exception ex) {
