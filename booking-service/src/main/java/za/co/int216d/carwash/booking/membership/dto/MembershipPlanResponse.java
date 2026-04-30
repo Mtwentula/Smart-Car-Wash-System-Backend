@@ -1,6 +1,7 @@
 package za.co.int216d.carwash.booking.membership.dto;
 
 import lombok.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -15,12 +16,12 @@ public class MembershipPlanResponse {
     private Long id;
     private String name;
     private String description;
-    private Double monthlyPrice;
+    private BigDecimal monthlyPrice;
     private Integer creditsPerMonth;
     private Integer freeWashes;
     private Boolean isActive;
     private Boolean discountEligible;
-    private Double discountPercentage;
+    private BigDecimal discountPercentage;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

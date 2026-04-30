@@ -29,7 +29,7 @@ public class PaymentCalculationService {
             throw new BadRequestException("Selected service is currently inactive");
         }
 
-        BigDecimal amount = BigDecimal.valueOf(serviceItem.getBasePrice());
+        BigDecimal amount = serviceItem.getBasePrice();
 
         if (addOnCodes == null || addOnCodes.isEmpty()) {
             return amount;
@@ -43,7 +43,7 @@ public class PaymentCalculationService {
                 throw new BadRequestException("Selected add-on is currently inactive: " + code);
             }
 
-            amount = amount.add(BigDecimal.valueOf(addon.getPrice()));
+            amount = amount.add(addon.getPrice());
         }
 
         return amount;

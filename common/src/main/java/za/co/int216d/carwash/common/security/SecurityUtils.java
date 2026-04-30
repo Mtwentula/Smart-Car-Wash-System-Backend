@@ -32,13 +32,14 @@ public class SecurityUtils {
 
     /**
      * Get the current authenticated user ID as Long
-     * Converts UUID to Long using most significant bits
+     * Converts UUID to Long using XOR of most and least significant bits
+     * for better distribution (reduces collision probability)
      * @return User ID as Long from the security context
      */
     public Long getCurrentUserIdAsLong() {
         UUID userId = getCurrentUserId();
         if (userId != null) {
-            return userId.getMostSignificantBits();
+            return userId.getMostSignificantBits() ^ userId.getLeastSignificantBits();
         }
         return null;
     }

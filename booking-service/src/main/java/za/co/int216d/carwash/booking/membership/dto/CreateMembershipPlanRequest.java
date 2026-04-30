@@ -2,6 +2,7 @@ package za.co.int216d.carwash.booking.membership.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
+import java.math.BigDecimal;
 
 /**
  * DTO for creating/updating membership plans
@@ -21,7 +22,7 @@ public class CreateMembershipPlanRequest {
 
     @NotNull(message = "Monthly price is required")
     @Positive(message = "Monthly price must be positive")
-    private Double monthlyPrice;
+    private BigDecimal monthlyPrice;
 
     @NotNull(message = "Credits per month is required")
     @PositiveOrZero(message = "Credits per month must be zero or positive")
@@ -40,5 +41,5 @@ public class CreateMembershipPlanRequest {
     @NotNull(message = "Discount percentage is required")
     @PositiveOrZero(message = "Discount percentage must be zero or positive")
     @Max(value = 100, message = "Discount percentage cannot exceed 100%")
-    private Double discountPercentage;
+    private BigDecimal discountPercentage;
 }

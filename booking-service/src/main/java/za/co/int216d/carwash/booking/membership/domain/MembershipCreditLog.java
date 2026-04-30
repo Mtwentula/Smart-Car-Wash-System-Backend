@@ -29,7 +29,7 @@ public class MembershipCreditLog {
     private Membership membership;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "transaction_type", nullable = false)
     private TransactionType type;  // PURCHASE, USAGE, REFUND, MONTHLY_ALLOCATION
 
     @Column(nullable = false)

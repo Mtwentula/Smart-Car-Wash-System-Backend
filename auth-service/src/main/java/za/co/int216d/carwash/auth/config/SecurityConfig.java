@@ -36,6 +36,8 @@ public class SecurityConfig {
                                 "/auth/login",
                                 "/auth/refresh",
                                 "/auth/verify-email",
+                                "/auth/password-reset/request",
+                                "/auth/password-reset/confirm",
                                 "/actuator/health",
                                 "/actuator/info"
                         ).permitAll()

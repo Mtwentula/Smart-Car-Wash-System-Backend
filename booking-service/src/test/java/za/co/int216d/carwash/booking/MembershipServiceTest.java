@@ -21,6 +21,7 @@ import za.co.int216d.carwash.booking.payment.service.PaymentService;
 import za.co.int216d.carwash.common.exception.BadRequestException;
 import za.co.int216d.carwash.common.exception.ResourceNotFoundException;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -60,11 +61,11 @@ class MembershipServiceTest {
         testPlan = MembershipPlan.builder()
             .id(1L)
             .name("Premium")
-            .monthlyPrice(299.99)
+            .monthlyPrice(BigDecimal.valueOf(299.99))
             .creditsPerMonth(40)
             .freeWashes(5)
             .isActive(true)
-            .discountPercentage(10.0)
+            .discountPercentage(BigDecimal.valueOf(10.0))
             .build();
 
         LocalDateTime now = LocalDateTime.now();

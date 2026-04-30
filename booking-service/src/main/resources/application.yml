@@ -1,23 +1,42 @@
 spring:
   application:
     name: booking-service
+  datasource:
+    url: jdbc:h2:mem:carwash_booking;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS booking_schema
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
+        default_schema: booking_schema
     show-sql: false
-  datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/int216d_carwash}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:postgres}
   flyway:
-    schemas: booking_schema
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-    default-schema: booking_schema
+    enabled: false
+  kafka:
+    bootstrap-servers: localhost:9092
+    listener:
+      auto-startup: false
+  mail:
+    host: localhost
+    port: 1025
+    username:
+    password:
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+
+jwt:
+  secret: ${JWT_SECRET:CHANGE_ME_TO_A_LONG_RANDOM_SECRET_MIN_32_BYTES}
+  access-expiry-ms: ${JWT_ACCESS_EXPIRY_MS:900000}
+  refresh-expiry-ms: ${JWT_REFRESH_EXPIRY_MS:604800000}
+  issuer: int216d-auth
 
 server:
   port: 8083
@@ -26,11 +45,15 @@ server:
 
 logging:
   level:
-    za.co.int216d: DEBUG
-    org.springframework.security: DEBUG
-    org.hibernate.SQL: DEBUG
+    za.co.int216d: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
 
 app:
+  scheduling:
+    enabled: ${SCHEDULING_ENABLED:true}
+    renewal-cron: ${SCHEDULING_RENEWAL_CRON:0 0 3 * * ?}
+    expiry-check-cron: ${SCHEDULING_EXPIRY_CHECK_CRON:0 30 0 * * ?}
   payment:
     enabled: ${PAYMENTS_ENABLED:true}
     currency: ${PAYMENT_CURRENCY:ZAR}

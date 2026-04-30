@@ -2,6 +2,8 @@ package za.co.int216d.carwash.booking.catalogue.dto;
 
 import lombok.Builder;
 
+import java.math.BigDecimal;
+
 @Builder
 public record CatalogueServiceResponse(
         Long id,
@@ -9,7 +11,7 @@ public record CatalogueServiceResponse(
         String name,
         String description,
         String serviceType,
-        Double basePrice,
+        BigDecimal basePrice,
         Integer durationMinutes,
         Boolean isActive
 ) {
