@@ -7,23 +7,23 @@ spring:
   application:
     name: auth-service
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/int216d_carwash}
-    username: ${DB_USER:dev}
-    password: ${DB_PASSWORD:dev}
+    url: jdbc:h2:mem:carwash_auth;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS auth_schema
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate:
         default_schema: auth_schema
-        jdbc.time_zone: UTC
     open-in-view: false
   flyway:
-    enabled: true
-    schemas: auth_schema
-    default-schema: auth_schema
-    locations: classpath:db/migration
-    create-schemas: true
+    enabled: false
   mail:
     host: ${MAIL_HOST:localhost}
     port: ${MAIL_PORT:1025}

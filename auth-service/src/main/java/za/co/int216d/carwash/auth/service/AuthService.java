@@ -12,6 +12,8 @@ import za.co.int216d.carwash.auth.dto.LoginResponse;
 import za.co.int216d.carwash.auth.dto.RegisterRequest;
 import za.co.int216d.carwash.auth.dto.RegisterResponse;
 import za.co.int216d.carwash.auth.dto.VerifyEmailRequest;
+import za.co.int216d.carwash.auth.dto.PasswordResetRequest;
+import za.co.int216d.carwash.auth.dto.PasswordResetConfirmRequest;
 import za.co.int216d.carwash.auth.repository.UserRepository;
 import za.co.int216d.carwash.common.exception.ApiException;
 import za.co.int216d.carwash.common.security.JwtService;
@@ -94,6 +96,32 @@ public class AuthService {
         return new LoginResult(
                 new LoginResponse(access, user.getId(), user.getRole(), jwtService.getAccessExpiryMs()),
                 newRefresh);
+    }
+
+    @Transactional
+    public void requestPasswordReset(PasswordResetRequest request) {
+        User user = users.findByEmailIgnoreCase(request.email().trim().toLowerCase())
+                .orElse(null);
+        if (user == null) return;
+
+        String resetCode = otpService.issue(user.getId());
+        emailService.sendPasswordReset(user.getEmail(), resetCode, props.getOtp().getTtlMinutes());
+        log.info("Password reset code dispatched for user {}", user.getId());
+    }
+
+    @Transactional
+    public void confirmPasswordReset(PasswordResetConfirmRequest request) {
+        User user = users.findByEmailIgnoreCase(request.email().trim().toLowerCase())
+                .orElseThrow(() -> ApiException.badRequest("Invalid email or reset code"));
+
+        if (!otpService.verify(user.getId(), request.resetCode())) {
+            throw ApiException.badRequest("Invalid or expired reset code");
+        }
+
+        user.setPasswordHash(encoder.encode(request.newPassword()));
+        users.save(user);
+        emailService.sendPasswordChanged(user.getEmail());
+        log.info("Password reset completed for user {}", user.getId());
     }
 
     public record LoginResult(LoginResponse response, String refreshToken) {}

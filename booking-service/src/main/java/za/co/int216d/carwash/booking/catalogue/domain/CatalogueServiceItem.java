@@ -3,6 +3,7 @@ package za.co.int216d.carwash.booking.catalogue.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -30,7 +31,7 @@ public class CatalogueServiceItem {
     private String serviceType;
 
     @Column(nullable = false)
-    private Double basePrice;
+    private BigDecimal basePrice;
 
     @Column(nullable = false)
     private Integer durationMinutes;

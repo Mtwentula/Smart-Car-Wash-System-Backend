@@ -12,6 +12,8 @@ import za.co.int216d.carwash.booking.membership.domain.MembershipPlan;
 import za.co.int216d.carwash.booking.membership.repository.MembershipPlanRepository;
 import za.co.int216d.carwash.booking.membership.repository.MembershipRepository;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -51,12 +53,12 @@ public class AdminAnalyticsService {
         List<MembershipPlan> allPlans = planRepository.findAll();
         List<MembershipPlan> activePlans = planRepository.findAllByIsActiveTrue();
 
-        Double totalRevenue = calculateTotalMonthlyRevenue();
-        Double avgPrice = allPlans.isEmpty() ? 0.0 :
+        BigDecimal totalRevenue = calculateTotalMonthlyRevenue();
+        BigDecimal avgPrice = allPlans.isEmpty() ? BigDecimal.ZERO :
             allPlans.stream()
-                .mapToDouble(MembershipPlan::getMonthlyPrice)
-                .average()
-                .orElse(0.0);
+                .map(MembershipPlan::getMonthlyPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .divide(BigDecimal.valueOf(allPlans.size()), 2, RoundingMode.HALF_UP);
 
         return AdminDashboardResponse.builder()
             .totalActiveMemberships(totalActive)
@@ -151,11 +153,11 @@ public class AdminAnalyticsService {
     /**
      * Calculate total monthly revenue based on active subscriptions
      */
-    private Double calculateTotalMonthlyRevenue() {
+    private BigDecimal calculateTotalMonthlyRevenue() {
         List<Membership> activeMemberships = membershipRepository.findAllByStatus(Membership.MembershipStatus.ACTIVE);
         return activeMemberships.stream()
-            .mapToDouble(m -> m.getPlan().getMonthlyPrice())
-            .sum();
+            .map(m -> m.getPlan().getMonthlyPrice())
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     /**
@@ -164,7 +166,7 @@ public class AdminAnalyticsService {
     private PlanAnalyticsResponse buildPlanAnalytics(MembershipPlan plan) {
         Long activeCount = membershipRepository.countActiveByPlan(plan.getId());
         Long totalCount = membershipRepository.countByPlanId(plan.getId());
-        Double revenue = activeCount * plan.getMonthlyPrice();
+        BigDecimal revenue = plan.getMonthlyPrice().multiply(BigDecimal.valueOf(activeCount));
         Double conversionRate = totalCount == 0 ? 0.0 : (double) activeCount / totalCount * 100;
 
         return PlanAnalyticsResponse.builder()

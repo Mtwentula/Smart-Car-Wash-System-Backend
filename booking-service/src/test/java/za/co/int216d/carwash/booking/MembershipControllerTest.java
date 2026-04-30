@@ -18,6 +18,8 @@ import za.co.int216d.carwash.booking.membership.service.MembershipService;
 import za.co.int216d.carwash.common.security.SecurityUtils;
 import za.co.int216d.carwash.booking.payment.dto.PaymentRequest;
 
+import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -51,10 +53,10 @@ class MembershipControllerTest {
         MembershipPlanResponse planResponse = MembershipPlanResponse.builder()
             .id(1L)
             .name("Premium")
-            .monthlyPrice(299.99)
+            .monthlyPrice(BigDecimal.valueOf(299.99))
             .creditsPerMonth(40)
             .freeWashes(5)
-            .discountPercentage(10.0)
+            .discountPercentage(BigDecimal.valueOf(10.0))
             .build();
 
         mockResponse = MembershipDetailResponse.builder()

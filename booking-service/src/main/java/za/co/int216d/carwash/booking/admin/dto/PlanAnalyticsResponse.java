@@ -1,6 +1,7 @@
 package za.co.int216d.carwash.booking.admin.dto;
 
 import lombok.*;
+import java.math.BigDecimal;
 
 /**
  * Membership plan analytics
@@ -12,9 +13,9 @@ import lombok.*;
 public class PlanAnalyticsResponse {
     private Long planId;
     private String planName;
-    private Double monthlyPrice;
+    private BigDecimal monthlyPrice;
     private Long activeSubscriptions;
     private Long totalSubscriptions;
-    private Double totalMonthlyRevenue;
+    private BigDecimal totalMonthlyRevenue;
     private Double conversionRate;
 }

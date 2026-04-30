@@ -18,6 +18,8 @@ import za.co.int216d.carwash.booking.membership.dto.SubscribeMembershipRequest;
 import za.co.int216d.carwash.booking.membership.repository.MembershipPlanRepository;
 import za.co.int216d.carwash.booking.membership.repository.MembershipRepository;
 import za.co.int216d.carwash.booking.membership.service.MembershipService;
+
+import java.math.BigDecimal;
 import za.co.int216d.carwash.booking.payment.dto.PaymentRequest;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,11 +75,11 @@ class MembershipIntegrationTest {
         // Create test plan
         testPlan = MembershipPlan.builder()
             .name("Test Plan")
-            .monthlyPrice(99.99)
+            .monthlyPrice(BigDecimal.valueOf(99.99))
             .creditsPerMonth(20)
             .freeWashes(2)
             .isActive(true)
-            .discountPercentage(5.0)
+            .discountPercentage(BigDecimal.valueOf(5.0))
             .build();
 
         testPlan = planRepository.save(testPlan);

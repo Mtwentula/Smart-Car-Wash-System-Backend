@@ -7,6 +7,7 @@ import za.co.int216d.carwash.booking.notification.event.MembershipEvent;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Produces membership events to Kafka
@@ -33,7 +34,16 @@ public class MembershipEventProducer {
         log.info("Publishing membership event: type={}, clientId={}, eventId={}",
             event.getEventType(), event.getClientId(), event.getEventId());
         
-        kafkaTemplate.send(TOPIC, event.getClientId().toString(), event);
+        try {
+            CompletableFuture<?> sendResult = kafkaTemplate.send(TOPIC, event.getClientId().toString(), event);
+            sendResult.whenComplete((result, error) -> {
+                if (error != null) {
+                    log.warn("Kafka publish failed for membership event {}: {}", event.getEventId(), error.getMessage());
+                }
+            });
+        } catch (Exception ex) {
+            log.warn("Kafka publish skipped for membership event {}: {}", event.getEventId(), ex.getMessage());
+        }
     }
 
     /**

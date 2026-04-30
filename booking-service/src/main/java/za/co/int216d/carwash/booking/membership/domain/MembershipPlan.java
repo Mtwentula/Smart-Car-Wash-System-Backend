@@ -2,6 +2,7 @@ package za.co.int216d.carwash.booking.membership.domain;
 
 import lombok.*;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -26,8 +27,8 @@ public class MembershipPlan {
     @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
-    private Double monthlyPrice;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal monthlyPrice;
 
     @Column(nullable = false)
     private Integer creditsPerMonth;
@@ -41,8 +42,8 @@ public class MembershipPlan {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean discountEligible;  // Tier-specific discounts
 
-    @Column(nullable = false)
-    private Double discountPercentage;  // e.g., 10% discount for premium members
+    @Column(nullable = false, precision = 5, scale = 2)
+    private BigDecimal discountPercentage;  // e.g., 10% discount for premium members
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

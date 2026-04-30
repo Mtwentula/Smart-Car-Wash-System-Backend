@@ -41,6 +41,14 @@ spring:
           uri: ${BOOKING_SERVICE_URL:http://localhost:8083}
           predicates:
             - Path=/api/v1/admin/**
+        - id: booking-service-payments
+          uri: ${BOOKING_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/v1/payments/**
+        - id: booking-service-notifications
+          uri: ${BOOKING_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/v1/notifications/**
 
 management:
   endpoints:

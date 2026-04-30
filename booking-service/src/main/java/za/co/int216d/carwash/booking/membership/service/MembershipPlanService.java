@@ -7,6 +7,7 @@ import za.co.int216d.carwash.booking.membership.domain.MembershipPlan;
 import za.co.int216d.carwash.booking.membership.dto.CreateMembershipPlanRequest;
 import za.co.int216d.carwash.booking.membership.dto.MembershipPlanResponse;
 import za.co.int216d.carwash.booking.membership.repository.MembershipPlanRepository;
+import za.co.int216d.carwash.booking.membership.repository.MembershipRepository;
 import za.co.int216d.carwash.common.exception.ResourceNotFoundException;
 import za.co.int216d.carwash.common.exception.BadRequestException;
 
@@ -22,9 +23,12 @@ import java.util.stream.Collectors;
 public class MembershipPlanService {
 
     private final MembershipPlanRepository planRepository;
+    private final MembershipRepository membershipRepository;
 
-    public MembershipPlanService(MembershipPlanRepository planRepository) {
+    public MembershipPlanService(MembershipPlanRepository planRepository,
+                                  MembershipRepository membershipRepository) {
         this.planRepository = planRepository;
+        this.membershipRepository = membershipRepository;
     }
 
     /**
@@ -128,8 +132,12 @@ public class MembershipPlanService {
             .orElseThrow(() -> new ResourceNotFoundException("Membership plan not found with ID: " + planId));
 
         // Check if plan has active memberships
-        // This would require a method in MembershipRepository to check
-        // For now, we'll assume it's safe to delete (should add validation in production)
+        long activeCount = membershipRepository.countActiveByPlan(planId);
+        if (activeCount > 0) {
+            throw new BadRequestException(
+                "Cannot delete plan with " + activeCount + " active membership(s). Deactivate or reassign them first."
+            );
+        }
 
         planRepository.delete(plan);
         log.info("Membership plan deleted: {}", planId);

@@ -1,6 +1,7 @@
 package za.co.int216d.carwash.booking.admin.dto;
 
 import lombok.*;
+import java.math.BigDecimal;
 
 /**
  * Dashboard statistics overview
@@ -15,8 +16,8 @@ public class AdminDashboardResponse {
     private Long totalExpiredMemberships;
     private Long totalCancelledMemberships;
     private Long totalMembers;
-    private Double totalMonthlyRevenue;
-    private Double averagePlanPrice;
+    private BigDecimal totalMonthlyRevenue;
+    private BigDecimal averagePlanPrice;
     private Integer totalPlans;
     private Integer activePlans;
 }

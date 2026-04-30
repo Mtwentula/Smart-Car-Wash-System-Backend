@@ -74,7 +74,7 @@ public class MembershipService {
             throw new BadRequestException("Membership plan is no longer active");
         }
 
-        BigDecimal chargeAmount = BigDecimal.valueOf(plan.getMonthlyPrice());
+        BigDecimal chargeAmount = plan.getMonthlyPrice();
         PaymentProcessResult paymentResult = paymentService.processPayment(
             clientId,
             null,
@@ -127,7 +127,7 @@ public class MembershipService {
     /**
      * Get client's current membership
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public MembershipDetailResponse getClientMembership(Long clientId) {
         Membership membership = membershipRepository.findByClientId(clientId)
             .orElseThrow(() -> new ResourceNotFoundException("No membership found for client ID: " + clientId));
@@ -153,7 +153,7 @@ public class MembershipService {
 
         MembershipPlan plan = membership.getPlan();
 
-        BigDecimal chargeAmount = BigDecimal.valueOf(plan.getMonthlyPrice());
+        BigDecimal chargeAmount = plan.getMonthlyPrice();
         PaymentProcessResult paymentResult = paymentService.processPayment(
             clientId,
             null,
@@ -211,7 +211,7 @@ public class MembershipService {
             throw new BadRequestException("Target membership plan is no longer active");
         }
 
-        BigDecimal chargeAmount = BigDecimal.valueOf(newPlan.getMonthlyPrice());
+        BigDecimal chargeAmount = newPlan.getMonthlyPrice();
         PaymentProcessResult paymentResult = paymentService.processPayment(
             clientId,
             null,
